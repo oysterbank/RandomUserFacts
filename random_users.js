@@ -18,6 +18,10 @@ class RandomUserTable extends React.Component {
     }
 
     computeBirthdayMessage(dob) {
+        if (!dob) {
+            return e("span", null, ""); 
+        }
+
         const today  = new Date();
         const dateOfBirth = new Date(dob);
         const thisMonth = today.getMonth();
@@ -46,6 +50,10 @@ class RandomUserTable extends React.Component {
     }
 
     formatDateOfBirth(dob) {
+        if (!dob) {
+            return "";
+        }
+
         const options = { year: "numeric", month: "long", day: "numeric" };
         const dateOfBirth = new Date(dob);
         return dateOfBirth.toLocaleDateString("en-US", options);
@@ -65,9 +73,9 @@ class RandomUserTable extends React.Component {
         const birthday = this.computeBirthdayMessage(user.dob.date);
 
         const userProps = [
-            user.name.first,
-            user.name.last,
-            user.location.country,
+            user.name ? user.name.first : "",
+            user.name ? user.name.last : "",
+            user.location ? user.location.country : "",
             formattedDateOfBirth,
             birthday
         ];
@@ -79,7 +87,9 @@ class RandomUserTable extends React.Component {
 
     renderTableRows(data) {
         return data.results.map((user, index) => {
-            return this.renderTableRow(user, index);
+            if (user) {
+                return this.renderTableRow(user, index);
+            }
         });
     }
 
