@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 
 const e = React.createElement;
 
@@ -42,22 +42,22 @@ class RandomUserTable extends React.Component {
             birthdayMessage = "Upcoming";
             color = "badge bg-primary";
         }
-        return e('span', { className: color }, birthdayMessage);
+        return e("span", { className: color }, birthdayMessage);
     }
 
     formatDateOfBirth(dob) {
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
+        const options = { year: "numeric", month: "long", day: "numeric" };
         const dateOfBirth = new Date(dob);
         return dateOfBirth.toLocaleDateString("en-US", options);
     }
 
     renderTableHeader() {
-        const headerNames = ['First Name', 'Last Name', 'Country', 'Date of Birth', 'Birthday'];
+        const headerNames = ["First Name", "Last Name", "Country", "Date of Birth", "Birthday"];
         const headers = headerNames.map((header, index) => {
-            return e('th', { key: index }, header);
+            return e("th", { key: index }, header);
         });
-        const tableRow = e('tr', null, headers);
-        return e('thead', null, tableRow);
+        const tableRow = e("tr", null, headers);
+        return e("thead", null, tableRow);
     }
 
     renderTableRow(user, index) {
@@ -72,9 +72,9 @@ class RandomUserTable extends React.Component {
             birthday
         ];
         const tableData = userProps.map((userProp, i) => {
-            return e('td', { key: i }, userProp);
+            return e("td", { key: i }, userProp);
         });
-        return e('tr', { key: index }, tableData);
+        return e("tr", { key: index }, tableData);
     }
 
     renderTableRows(data) {
@@ -86,13 +86,13 @@ class RandomUserTable extends React.Component {
     renderTable(data) {
         const tableHeader = this.renderTableHeader();
         const tableRows = this.renderTableRows(data);
-        const tableBody = e('tbody', null, tableRows);
-        return e('table', { className: 'table' }, tableHeader, tableBody);
+        const tableBody = e("tbody", null, tableRows);
+        return e("table", { className: "table" }, tableHeader, tableBody);
     }
 
     fetchUsers = async() => {
         try {
-            await fetch('https://randomuser.me/api/?results=100')
+            await fetch("https://randomuser.me/api/?results=100")
             .then(results => {
                 return results.json();
             })
@@ -116,16 +116,16 @@ class RandomUserTable extends React.Component {
         const { isLoading, error, users } = this.state;
 
         if (error) {
-            return e('p', null, error.message);
+            return e("p", null, error.message);
         }
 
         if (isLoading) {
-            return e('p', null, 'Loading...');
+            return e("p", null, "Loading...");
         }
 
-        return e('div', null, users);
+        return e("div", null, users);
     }
 }
 
-const domContainer = document.querySelector('#random_user_table');
+const domContainer = document.querySelector("#random_user_table");
 ReactDOM.render(e(RandomUserTable), domContainer);
