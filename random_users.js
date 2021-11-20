@@ -3,6 +3,9 @@
 const e = React.createElement;
 
 class RandomUserTable extends React.Component {
+    /**
+     * Creates an instance of RandomUserTable.
+     */
     constructor(props) {
         super(props);
         this.state = {
@@ -22,11 +25,18 @@ class RandomUserTable extends React.Component {
         this.flipSortDirection = () => this.state.sortDirection === "asc" ? "desc" : "asc";
     }
 
+    /**
+     * Fetch users after the component mounts.
+     */
     componentDidMount() {
         this.setState({ isLoading: true });
         this.fetchUsers();
     }
 
+    /**
+     * Given the index of a table header, update the sorting-related state and
+     * then re-render the table.
+     */
     handleSort(index) {
         this.setState({
             sortDirection: this.state.selectedHeaderIndex === index ? this.flipSortDirection() : "asc",
@@ -35,11 +45,18 @@ class RandomUserTable extends React.Component {
         () => {this.renderTable()});
     }
 
+    /**
+     * Toggles the sorting direction between ascending and descending.
+     */
     flipSortDirection() {
         return this.state.sortDirection === "asc" ? "desc" : "asc";
     }
 
-    computeBirthdayMessage(dob) {
+    /**
+     * Given a string representing a date of birth, determine the appropriate
+     * status to display in the table's Birthday column.
+     */
+    computeBirthdayStatus(dob) {
         if (!dob) {
             return ""; 
         }
@@ -51,27 +68,31 @@ class RandomUserTable extends React.Component {
         const birthMonth = dateOfBirth.getMonth();
         const birthDate = dateOfBirth.getDate();
 
-        let birthdayMessage = "Today!";
+        let birthdayStatus = "Today!";
         if (birthMonth == thisMonth) {
             if (birthDate < thisDate) {
-                birthdayMessage = "Passed";
+                birthdayStatus = "Passed";
             } else if (birthDate > thisDate) {
-                birthdayMessage = "Upcoming";
+                birthdayStatus = "Upcoming";
             }
         } else if (birthMonth < thisMonth) {
-            birthdayMessage = "Passed";
+            birthdayStatus = "Passed";
         } else if (birthMonth > thisMonth) {
-            birthdayMessage = "Upcoming";
+            birthdayStatus = "Upcoming";
         }
-        return birthdayMessage;
+        return birthdayStatus;
     }
 
-    getBirthdayMessageColor(birthdayMessage) {
-        if (!birthdayMessage) {
+    /**
+     * Given a string representing a birthdayStatus, return the CSS class that
+     * corresponds to the correct color.
+     */
+    getBirthdayStatusColor(birthdayStatus) {
+        if (!birthdayStatus) {
             return ""
         }
 
-        switch(birthdayMessage) {
+        switch(birthdayStatus) {
             case "Today!":
                 return "badge bg-success";
             case "Passed":
@@ -81,6 +102,9 @@ class RandomUserTable extends React.Component {
         }
     }
 
+    /**
+     * Format a given date of birth string to a more readable representation.
+     */
     formatDateOfBirth(dob) {
         if (!dob) {
             return "";
@@ -91,6 +115,9 @@ class RandomUserTable extends React.Component {
         return dateOfBirth.toLocaleDateString("en-US", options);
     }
 
+    /**
+     * Build the header for the table.
+     */
     renderTableHeader() {
         const headerNames = ["First Name", "Last Name", "Country", "Date of Birth", "Birthday"];
         const headers = headerNames.map((header, index) => {
@@ -102,8 +129,11 @@ class RandomUserTable extends React.Component {
         return e("thead", null, tableRow);
     }
 
+    /**
+     * Build a table row for a given user object.
+     */
     renderTableRow(user, index) {
-        const color = this.getBirthdayMessageColor(user.birthday);
+        const color = this.getBirthdayStatusColor(user.birthday);
         const userProps = [
             user.firstName,
             user.lastName,
@@ -117,6 +147,9 @@ class RandomUserTable extends React.Component {
         return e("tr", { key: index }, tableData);
     }
 
+    /**
+     * Build the table rows for each user object.
+     */
     renderTableRows(userObjects) {
         return userObjects.map((user, index) => {
             if (user) {
@@ -125,6 +158,11 @@ class RandomUserTable extends React.Component {
         });
     }
 
+    /**
+     * Determines the sort criteria for the list of user objects stored in state.
+     * The user objects are then sorted and their data is added to a table.
+     * Finally, the table is added to state.
+     */
     renderTable() {
         const comparator = this.state.sortDirection === "asc" ? this.ascSort : this.descSort;
         let userList = this.state.userObjects;
@@ -141,6 +179,9 @@ class RandomUserTable extends React.Component {
         });
     }
 
+    /**
+     * Fetches a JSON list of random users from the API.
+     */
     fetchUsers = async() => {
         try {
             await fetch("https://randomuser.me/api/?results=100")
@@ -154,7 +195,7 @@ class RandomUserTable extends React.Component {
                         "lastName": user.name ? user.name.last : "",
                         "country": user.location ? user.location.country : "",
                         "dob": this.formatDateOfBirth(user.dob.date),
-                        "birthday": this.computeBirthdayMessage(user.dob.date)
+                        "birthday": this.computeBirthdayStatus(user.dob.date)
                     };
                 });
 
@@ -173,6 +214,9 @@ class RandomUserTable extends React.Component {
         }
     }
 
+    /**
+     * Render the user table once it has been built.
+     */
     render() {
         if (this.state.error) {
             return e("p", null, this.state.error.message);
