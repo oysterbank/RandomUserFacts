@@ -8,8 +8,18 @@ class RandomUserTable extends React.Component {
         this.state = {
             isLoading: false,
             error: null,
-            users: null
+            userObjects: null,
+            userTable: null,
+            sortDirection: "asc",
+            selectedHeaderIndex: 0
         };
+
+        this.ascSort = (row1, row2) => row1[Object.keys(row1)[this.state.selectedHeaderIndex]]
+            .localeCompare(row2[Object.keys(row2)[this.state.selectedHeaderIndex]]);
+        this.descSort = (row1, row2) => row2[Object.keys(row2)[this.state.selectedHeaderIndex]]
+            .localeCompare(row1[Object.keys(row1)[this.state.selectedHeaderIndex]]);
+
+        this.flipSortDirection = () => this.state.sortDirection === "asc" ? "desc" : "asc";
     }
 
     componentDidMount() {
@@ -17,9 +27,21 @@ class RandomUserTable extends React.Component {
         this.fetchUsers();
     }
 
+    handleSort(index) {
+        this.setState({
+            sortDirection: this.state.selectedHeaderIndex === index ? this.flipSortDirection() : "asc",
+            selectedHeaderIndex: index
+        },
+        () => {this.renderTable()});
+    }
+
+    flipSortDirection() {
+        return this.state.sortDirection === "asc" ? "desc" : "asc";
+    }
+
     computeBirthdayMessage(dob) {
         if (!dob) {
-            return e("span", null, ""); 
+            return ""; 
         }
 
         const today  = new Date();
@@ -30,23 +52,33 @@ class RandomUserTable extends React.Component {
         const birthDate = dateOfBirth.getDate();
 
         let birthdayMessage = "Today!";
-        let color = "badge bg-success";
         if (birthMonth == thisMonth) {
             if (birthDate < thisDate) {
                 birthdayMessage = "Passed";
-                color = "badge bg-danger";
             } else if (birthDate > thisDate) {
                 birthdayMessage = "Upcoming";
-                color = "badge bg-primary";
             }
         } else if (birthMonth < thisMonth) {
             birthdayMessage = "Passed";
-            color = "badge bg-danger";
-        } else {
+        } else if (birthMonth > thisMonth) {
             birthdayMessage = "Upcoming";
-            color = "badge bg-primary";
         }
-        return e("span", { className: color }, birthdayMessage);
+        return birthdayMessage;
+    }
+
+    getBirthdayMessageColor(birthdayMessage) {
+        if (!birthdayMessage) {
+            return ""
+        }
+
+        switch(birthdayMessage) {
+            case "Today!":
+                return "badge bg-success";
+            case "Passed":
+                return "badge bg-danger";
+            case "Upcoming":
+                return "badge bg-primary";
+        }
     }
 
     formatDateOfBirth(dob) {
@@ -62,22 +94,22 @@ class RandomUserTable extends React.Component {
     renderTableHeader() {
         const headerNames = ["First Name", "Last Name", "Country", "Date of Birth", "Birthday"];
         const headers = headerNames.map((header, index) => {
-            return e("th", { key: index }, header);
+            return e("th", { key: index, onClick: () => {
+                this.handleSort(index);
+            } }, header);
         });
         const tableRow = e("tr", null, headers);
         return e("thead", null, tableRow);
     }
 
     renderTableRow(user, index) {
-        const formattedDateOfBirth = this.formatDateOfBirth(user.dob.date);
-        const birthday = this.computeBirthdayMessage(user.dob.date);
-
+        const color = this.getBirthdayMessageColor(user.birthday);
         const userProps = [
-            user.name ? user.name.first : "",
-            user.name ? user.name.last : "",
-            user.location ? user.location.country : "",
-            formattedDateOfBirth,
-            birthday
+            user.firstName,
+            user.lastName,
+            user.country,
+            user.dob,
+            e("span", { className: color }, user.birthday)
         ];
         const tableData = userProps.map((userProp, i) => {
             return e("td", { key: i }, userProp);
@@ -85,19 +117,28 @@ class RandomUserTable extends React.Component {
         return e("tr", { key: index }, tableData);
     }
 
-    renderTableRows(data) {
-        return data.results.map((user, index) => {
+    renderTableRows(userObjects) {
+        return userObjects.map((user, index) => {
             if (user) {
                 return this.renderTableRow(user, index);
             }
         });
     }
 
-    renderTable(data) {
+    renderTable() {
+        const comparator = this.state.sortDirection === "asc" ? this.ascSort : this.descSort;
+        let userList = this.state.userObjects;
+        userList.sort(comparator);
+
         const tableHeader = this.renderTableHeader();
-        const tableRows = this.renderTableRows(data);
+        const tableRows = this.renderTableRows(userList);
         const tableBody = e("tbody", null, tableRows);
-        return e("table", { className: "table" }, tableHeader, tableBody);
+        const table = e("table", { className: "table" }, tableHeader, tableBody);
+
+        this.setState({
+            isLoading: false,
+            userTable: table
+        });
     }
 
     fetchUsers = async() => {
@@ -107,10 +148,20 @@ class RandomUserTable extends React.Component {
                 return results.json();
             })
             .then(data => {
-                const users = this.renderTable(data);
+                const userObjects = data.results.map((user) => {
+                    return {
+                        "firstName": user.name ? user.name.first : "",
+                        "lastName": user.name ? user.name.last : "",
+                        "country": user.location ? user.location.country : "",
+                        "dob": this.formatDateOfBirth(user.dob.date),
+                        "birthday": this.computeBirthdayMessage(user.dob.date)
+                    };
+                });
+
                 this.setState({
-                    isLoading: false,
-                    users: users
+                    userObjects: userObjects,
+                }, () => {
+                    this.renderTable();
                 });
             });
         }
@@ -123,17 +174,15 @@ class RandomUserTable extends React.Component {
     }
 
     render() {
-        const { isLoading, error, users } = this.state;
-
-        if (error) {
-            return e("p", null, error.message);
+        if (this.state.error) {
+            return e("p", null, this.state.error.message);
         }
 
-        if (isLoading) {
+        if (this.state.isLoading) {
             return e("p", null, "Loading...");
         }
 
-        return e("div", null, users);
+        return e("div", null, this.state.userTable);
     }
 }
 
