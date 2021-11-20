@@ -1,5 +1,23 @@
 "use strict";
 
+const API_URL = "https://randomuser.me/api/?results=100";
+const INJECTION_POINT = "#random_user_table";
+const HEADERS = ["First Name", "Last Name", "Country", "Date of Birth", "Birthday"];
+const TAGS = {
+    div: "div",
+    p: "p",
+    span: "span",
+    table: "table",
+    thead: "thead",
+    tbody: "tbody",
+    tr: "tr",
+    th: "th",
+    td: "td"
+};
+const SORT_DIRECTION = {
+    asc: "asc",
+    desc: "desc"
+};
 const e = React.createElement;
 
 class RandomUserTable extends React.Component {
@@ -13,7 +31,7 @@ class RandomUserTable extends React.Component {
             error: null,
             userObjects: null,
             userTable: null,
-            sortDirection: "asc",
+            sortDirection: SORT_DIRECTION.asc,
             selectedHeaderIndex: 0
         };
 
@@ -21,8 +39,6 @@ class RandomUserTable extends React.Component {
             .localeCompare(row2[Object.keys(row2)[this.state.selectedHeaderIndex]]);
         this.descSort = (row1, row2) => row2[Object.keys(row2)[this.state.selectedHeaderIndex]]
             .localeCompare(row1[Object.keys(row1)[this.state.selectedHeaderIndex]]);
-
-        this.flipSortDirection = () => this.state.sortDirection === "asc" ? "desc" : "asc";
     }
 
     /**
@@ -39,7 +55,7 @@ class RandomUserTable extends React.Component {
      */
     handleSort(index) {
         this.setState({
-            sortDirection: this.state.selectedHeaderIndex === index ? this.flipSortDirection() : "asc",
+            sortDirection: this.state.selectedHeaderIndex === index ? this.flipSortDirection() : SORT_DIRECTION.asc,
             selectedHeaderIndex: index
         },
         () => {this.renderTable()});
@@ -49,7 +65,7 @@ class RandomUserTable extends React.Component {
      * Toggles the sorting direction between ascending and descending.
      */
     flipSortDirection() {
-        return this.state.sortDirection === "asc" ? "desc" : "asc";
+        return this.state.sortDirection === SORT_DIRECTION.asc ? SORT_DIRECTION.desc : SORT_DIRECTION.asc;
     }
 
     /**
@@ -119,14 +135,13 @@ class RandomUserTable extends React.Component {
      * Build the header for the table.
      */
     renderTableHeader() {
-        const headerNames = ["First Name", "Last Name", "Country", "Date of Birth", "Birthday"];
-        const headers = headerNames.map((header, index) => {
-            return e("th", { key: index, onClick: () => {
+        const headers = HEADERS.map((header, index) => {
+            return e(TAGS.th, { key: index, onClick: () => {
                 this.handleSort(index);
             } }, header);
         });
-        const tableRow = e("tr", null, headers);
-        return e("thead", null, tableRow);
+        const tableRow = e(TAGS.tr, null, headers);
+        return e(TAGS.thead, null, tableRow);
     }
 
     /**
@@ -139,12 +154,12 @@ class RandomUserTable extends React.Component {
             user.lastName,
             user.country,
             user.dob,
-            e("span", { className: color }, user.birthday)
+            e(TAGS.span, { className: color }, user.birthday)
         ];
         const tableData = userProps.map((userProp, i) => {
-            return e("td", { key: i }, userProp);
+            return e(TAGS.td, { key: i }, userProp);
         });
-        return e("tr", { key: index }, tableData);
+        return e(TAGS.tr, { key: index }, tableData);
     }
 
     /**
@@ -164,14 +179,14 @@ class RandomUserTable extends React.Component {
      * Finally, the table is added to state.
      */
     renderTable() {
-        const comparator = this.state.sortDirection === "asc" ? this.ascSort : this.descSort;
+        const comparator = this.state.sortDirection === SORT_DIRECTION.asc ? this.ascSort : this.descSort;
         let userList = this.state.userObjects;
         userList.sort(comparator);
 
         const tableHeader = this.renderTableHeader();
         const tableRows = this.renderTableRows(userList);
-        const tableBody = e("tbody", null, tableRows);
-        const table = e("table", { className: "table" }, tableHeader, tableBody);
+        const tableBody = e(TAGS.tbody, null, tableRows);
+        const table = e(TAGS.table, { className: TAGS.table }, tableHeader, tableBody);
 
         this.setState({
             isLoading: false,
@@ -184,7 +199,7 @@ class RandomUserTable extends React.Component {
      */
     fetchUsers = async() => {
         try {
-            await fetch("https://randomuser.me/api/?results=100")
+            await fetch(API_URL)
             .then(results => {
                 return results.json();
             })
@@ -219,16 +234,16 @@ class RandomUserTable extends React.Component {
      */
     render() {
         if (this.state.error) {
-            return e("p", null, this.state.error.message);
+            return e(TAGS.p, null, this.state.error.message);
         }
 
         if (this.state.isLoading) {
-            return e("p", null, "Loading...");
+            return e(TAGS.p, null, "Loading...");
         }
 
-        return e("div", null, this.state.userTable);
+        return e(TAGS.div, null, this.state.userTable);
     }
 }
 
-const domContainer = document.querySelector("#random_user_table");
+const domContainer = document.querySelector(INJECTION_POINT);
 ReactDOM.render(e(RandomUserTable), domContainer);
