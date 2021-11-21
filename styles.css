@@ -1,0 +1,12 @@
+#mocha {
+    margin: 0;
+}
+#mocha-stats {
+    position: relative;
+    top: 0;
+    right: 0;
+    color: black;
+}
+.card {
+    margin: 1rem;
+}
