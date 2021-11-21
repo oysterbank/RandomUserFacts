@@ -125,10 +125,8 @@ class RandomUserTable extends React.Component {
         if (!dob) {
             return "";
         }
-
-        const options = { year: "numeric", month: "long", day: "numeric" };
-        const dateOfBirth = new Date(dob);
-        return dateOfBirth.toLocaleDateString("en-US", options);
+        
+        return dob.split('T')[0];
     }
 
     /**
