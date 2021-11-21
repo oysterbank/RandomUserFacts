@@ -142,7 +142,14 @@ class RandomUserTable extends React.Component {
         if (!dob || !Date.parse(dob)) {
             return "";
         }
-        return dob.split('T')[0];
+
+        // Account for timezone when shortening an ISOString
+        const birthDate = new Date(dob);
+        const offset = birthDate.getTimezoneOffset();
+        const birthTime = birthDate.getTime();
+        dob = new Date(birthTime - (offset*60*1000));
+
+        return dob.toISOString().split('T')[0];
     }
 
     /**
