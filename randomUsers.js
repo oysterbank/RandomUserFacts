@@ -73,7 +73,7 @@ class RandomUserTable extends React.Component {
      * status to display in the table's Birthday column.
      */
     computeBirthdayStatus(dob) {
-        if (!dob) {
+        if (!dob || !Date.parse(dob)) {
             return ""; 
         }
 
@@ -115,6 +115,8 @@ class RandomUserTable extends React.Component {
                 return "badge bg-danger";
             case "Upcoming":
                 return "badge bg-primary";
+            default:
+                return "";
         }
     }
 
@@ -122,10 +124,9 @@ class RandomUserTable extends React.Component {
      * Format a given date of birth string to a more readable representation.
      */
     formatDateOfBirth(dob) {
-        if (!dob) {
+        if (!dob || !Date.parse(dob)) {
             return "";
         }
-        
         return dob.split('T')[0];
     }
 
