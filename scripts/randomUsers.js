@@ -72,7 +72,7 @@ class RandomUserTable extends React.Component {
      * Given a header index, determine if an up or down carat should display to
      * indicate sort order.
      */
-    getSortIconDirection(index) {
+    getSortIconClass(index) {
         if (this.state.selectedHeaderIndex === index) {
             if (this.state.sortDirection === SORT_DIRECTION.desc) {
                 return "bi bi-caret-up-fill"
@@ -150,8 +150,8 @@ class RandomUserTable extends React.Component {
      */
     renderTableHeader() {
         const headers = HEADERS.map((header, index) => {
-            let sortIconDirection = this.getSortIconDirection(index);
-            let sortIcon = e("i", { className: sortIconDirection }, null);
+            let sortIconClass = this.getSortIconClass(index);
+            let sortIcon = e("i", { className: sortIconClass }, null);
             return e(TAGS.th, { key: index, onClick: () => {
                 this.handleSort(index);
             } }, header, " ", sortIcon);
