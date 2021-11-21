@@ -69,6 +69,21 @@ class RandomUserTable extends React.Component {
     }
 
     /**
+     * Given a header index, determine if an up or down carat should display to
+     * indicate sort order.
+     */
+    getSortIconDirection(index) {
+        if (this.state.selectedHeaderIndex === index) {
+            if (this.state.sortDirection === SORT_DIRECTION.desc) {
+                return "bi bi-caret-up-fill"
+            } else if (this.state.sortDirection === SORT_DIRECTION.asc) {
+                return "bi bi-caret-down-fill"
+            }
+        }
+        return ""
+    }
+
+    /**
      * Given a string representing a date of birth, determine the appropriate
      * status to display in the table's Birthday column.
      */
@@ -135,9 +150,11 @@ class RandomUserTable extends React.Component {
      */
     renderTableHeader() {
         const headers = HEADERS.map((header, index) => {
+            let sortIconDirection = this.getSortIconDirection(index);
+            let sortIcon = e("i", { className: sortIconDirection }, null);
             return e(TAGS.th, { key: index, onClick: () => {
                 this.handleSort(index);
-            } }, header);
+            } }, header, " ", sortIcon);
         });
         const tableRow = e(TAGS.tr, null, headers);
         return e(TAGS.thead, null, tableRow);
