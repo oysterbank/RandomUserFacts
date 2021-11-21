@@ -133,6 +133,14 @@ describe("RandomUserTable tests", function () {
             assert.equal(birthdayStatus, "1961-12-25");
         });
     });
+
+    describe("RandomUserTable.getSortIconClass()", function () {
+        it("returns 'bi bi-caret-down-fill' when given the index of ascending-sorted column", function () {
+            assert.equal(usersTable.state.sortDirection, "asc");
+            const sortIconClass = usersTable.getSortIconClass(0);
+            assert.equal(sortIconClass, "bi bi-caret-down-fill");
+        });
+    });
 });
   
 mocha.run();

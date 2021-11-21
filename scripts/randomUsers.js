@@ -150,8 +150,8 @@ class RandomUserTable extends React.Component {
      */
     renderTableHeader() {
         const headers = HEADERS.map((header, index) => {
-            let sortIconClass = this.getSortIconClass(index);
-            let sortIcon = e("i", { className: sortIconClass }, null);
+            const sortIconClass = this.getSortIconClass(index);
+            const sortIcon = e("i", { className: sortIconClass }, null);
             return e(TAGS.th, { key: index, onClick: () => {
                 this.handleSort(index);
             } }, header, " ", sortIcon);
