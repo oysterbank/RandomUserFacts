@@ -12,7 +12,8 @@ const TAGS = {
     tbody: "tbody",
     tr: "tr",
     th: "th",
-    td: "td"
+    td: "td",
+    i: "i"
 };
 const SORT_DIRECTION = {
     asc: "asc",
@@ -158,7 +159,7 @@ class RandomUserTable extends React.Component {
     renderTableHeader() {
         const headers = HEADERS.map((header, index) => {
             const sortIconClass = this.getSortIconClass(index);
-            const sortIcon = e("i", { className: sortIconClass }, null);
+            const sortIcon = e(TAGS.i, { className: sortIconClass }, null);
             return e(TAGS.th, { key: index, onClick: () => {
                 this.handleSort(index);
             } }, header, " ", sortIcon);
@@ -202,9 +203,9 @@ class RandomUserTable extends React.Component {
      * Finally, the table is added to state.
      */
     renderTable() {
-        const comparator = this.state.sortDirection === SORT_DIRECTION.asc ? this.ascSort : this.descSort;
-        let userList = this.state.userObjects;
-        userList.sort(comparator);
+        const sortComparator = this.state.sortDirection === SORT_DIRECTION.asc ? this.ascSort : this.descSort;
+        const userList = this.state.userObjects;
+        userList.sort(sortComparator);
 
         const tableHeader = this.renderTableHeader();
         const tableRows = this.renderTableRows(userList);

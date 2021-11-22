@@ -1,11 +1,24 @@
 #mocha {
     margin: 0;
+    font: inherit;
+}
+#mocha h1 {
+    font-size: 1.4rem;
+}
+#mocha h2 {
+    font-size: 0.85rem;
+    padding-right: 15px;
+}
+#mocha .suite .suite h1 {
+    margin-top: 15px;
+    font-size: 1rem;
 }
 #mocha-stats {
     position: relative;
     top: 0;
     right: 0;
     color: black;
+    font-size: inherit;
 }
 .card {
     margin-top: 2.5rem;
