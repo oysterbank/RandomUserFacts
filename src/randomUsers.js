@@ -2,24 +2,11 @@
 
 const API_URL = "https://randomuser.me/api/?results=100";
 const INJECTION_POINT = "#random_user_table";
-const HEADERS = ["First Name", "Last Name", "Country", "Date of Birth", "Birthday"];
-const TAGS = {
-    div: "div",
-    p: "p",
-    span: "span",
-    table: "table",
-    thead: "thead",
-    tbody: "tbody",
-    tr: "tr",
-    th: "th",
-    td: "td",
-    i: "i"
-};
+const TABLE_HEADERS = ["First Name", "Last Name", "Country", "Date of Birth", "Birthday"];
 const SORT_DIRECTION = {
     asc: "asc",
     desc: "desc"
 };
-const e = React.createElement;
 
 class RandomUserTable extends React.Component {
     /**
@@ -157,15 +144,16 @@ class RandomUserTable extends React.Component {
      * Build the header for the table.
      */
     renderTableHeader() {
-        const headers = HEADERS.map((header, index) => {
+        const headers = TABLE_HEADERS.map((header, index) => {
             const sortIconClass = this.getSortIconClass(index);
-            const sortIcon = e(TAGS.i, { className: sortIconClass }, null);
-            return e(TAGS.th, { key: index, onClick: () => {
-                this.handleSort(index);
-            } }, header, " ", sortIcon);
+            const sortIcon = <i className={sortIconClass}></i>;
+
+            return (
+                <th onClick={() => this.handleSort(index) }>{header} {sortIcon}</th>
+            );
         });
-        const tableRow = e(TAGS.tr, null, headers);
-        return e(TAGS.thead, null, tableRow);
+        const tableRow = <tr>{headers}</tr>;
+        return <thead>{tableRow}</thead>;
     }
 
     /**
@@ -178,12 +166,12 @@ class RandomUserTable extends React.Component {
             user.lastName,
             user.country,
             user.dob,
-            e(TAGS.span, { className: color }, user.birthday)
+            <span className={color}>{user.birthday}</span>
         ];
         const tableData = userProps.map((userProp, i) => {
-            return e(TAGS.td, { key: i }, userProp);
+            return <td>{userProp}</td>;
         });
-        return e(TAGS.tr, { key: index }, tableData);
+        return <tr>{tableData}</tr>;
     }
 
     /**
@@ -209,8 +197,11 @@ class RandomUserTable extends React.Component {
 
         const tableHeader = this.renderTableHeader();
         const tableRows = this.renderTableRows(userList);
-        const tableBody = e(TAGS.tbody, null, tableRows);
-        const table = e(TAGS.table, { className: TAGS.table }, tableHeader, tableBody);
+        const tableBody = <tbody>{tableRows}</tbody>;
+        const table = <table className="table">
+            {tableHeader}
+            {tableBody}
+        </table>;
 
         this.setState({
             isLoading: false,
@@ -221,9 +212,9 @@ class RandomUserTable extends React.Component {
     /**
      * Fetches a JSON list of random users from the API.
      */
-    fetchUsers = async() => {
+    fetchUsers = () => {
         try {
-            await fetch(API_URL)
+            fetch(API_URL)
             .then(results => {
                 return results.json();
             })
@@ -258,16 +249,16 @@ class RandomUserTable extends React.Component {
      */
     render() {
         if (this.state.error) {
-            return e(TAGS.p, null, this.state.error.message);
+            return <p>{this.state.error.message}</p>;
         }
 
         if (this.state.isLoading) {
-            return e(TAGS.p, null, "Loading...");
+            return <p>Loading...</p>;
         }
 
-        return e(TAGS.div, null, this.state.userTable);
+        return <div>{this.state.userTable}</div>;
     }
 }
 
-const domContainer = document.querySelector(INJECTION_POINT);
-ReactDOM.render(e(RandomUserTable), domContainer);
+let domContainer = document.querySelector(INJECTION_POINT);
+ReactDOM.render(<RandomUserTable />, domContainer);
