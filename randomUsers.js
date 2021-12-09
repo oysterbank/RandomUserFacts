@@ -102,6 +102,83 @@ var formatDateOfBirth = function formatDateOfBirth(dob) {
 };
 
 /**
+ * Build a table row for a given user object.
+ */
+var renderTableRow = function renderTableRow(user) {
+    var color = getBirthdayStatusColor(user.birthday);
+    var userProps = [user.firstName, user.lastName, user.country, user.dob, React.createElement(
+        "span",
+        { className: color },
+        user.birthday
+    )];
+    var tableData = userProps.map(function (userProp) {
+        return React.createElement(
+            "td",
+            null,
+            userProp
+        );
+    });
+    return React.createElement(
+        "tr",
+        null,
+        tableData
+    );
+};
+
+/**
+ * Table Rows representing users.
+ */
+var TableRows = function TableRows(_ref) {
+    var userObjects = _ref.userObjects;
+
+    return userObjects.map(function (user) {
+        if (user) {
+            return renderTableRow(user);
+        }
+    });
+};
+
+/**
+ * Header for the User Table.
+ */
+var TableHeader = function TableHeader(_ref2) {
+    var onHeaderIndexUpdate = _ref2.onHeaderIndexUpdate,
+        headerIndex = _ref2.headerIndex,
+        onDirectionUpdate = _ref2.onDirectionUpdate,
+        direction = _ref2.direction;
+
+    var handleSort = function handleSort(index) {
+        // Given the index of a table header, update the sorting-related state and
+        // then re-render the table.
+        onDirectionUpdate(headerIndex === index ? flipSortDirection(direction) : SORT_DIRECTION.asc);
+        onHeaderIndexUpdate(index);
+    };
+
+    var headers = TABLE_HEADERS.map(function (header, index) {
+        var sortIconClass = getSortIconClass(index, headerIndex, direction);
+
+        return React.createElement(
+            "th",
+            { onClick: function onClick() {
+                    return handleSort(index);
+                } },
+            header,
+            " ",
+            React.createElement("i", { className: sortIconClass })
+        );
+    });
+    return React.createElement(
+        "thead",
+        null,
+        React.createElement(
+            "tr",
+            null,
+            headers
+        )
+    );
+};
+
+/**
  * Render the RandomUserTable.
  */
 var RandomUserTable = function RandomUserTable() {
@@ -161,80 +238,6 @@ var RandomUserTable = function RandomUserTable() {
     }, [userObjects, sortDirection, selectedHeaderIndex]);
 
     /**
-     * Given the index of a table header, update the sorting-related state and
-     * then re-render the table.
-     */
-    var handleSort = function handleSort(index) {
-        setSortDirection(selectedHeaderIndex === index ? flipSortDirection(sortDirection) : SORT_DIRECTION.asc);
-        setSelectedHeaderIndex(index);
-    };
-
-    /**
-     * Build the header for the table.
-     */
-    var renderTableHeader = function renderTableHeader() {
-        var headers = TABLE_HEADERS.map(function (header, index) {
-            var sortIconClass = getSortIconClass(index, selectedHeaderIndex, sortDirection);
-            var sortIcon = React.createElement("i", { className: sortIconClass });
-
-            return React.createElement(
-                "th",
-                { onClick: function onClick() {
-                        return handleSort(index);
-                    } },
-                header,
-                " ",
-                sortIcon
-            );
-        });
-        var tableRow = React.createElement(
-            "tr",
-            null,
-            headers
-        );
-        return React.createElement(
-            "thead",
-            null,
-            tableRow
-        );
-    };
-
-    /**
-     * Build a table row for a given user object.
-     */
-    var renderTableRow = function renderTableRow(user, index) {
-        var color = getBirthdayStatusColor(user.birthday);
-        var userProps = [user.firstName, user.lastName, user.country, user.dob, React.createElement(
-            "span",
-            { className: color },
-            user.birthday
-        )];
-        var tableData = userProps.map(function (userProp, i) {
-            return React.createElement(
-                "td",
-                null,
-                userProp
-            );
-        });
-        return React.createElement(
-            "tr",
-            null,
-            tableData
-        );
-    };
-
-    /**
-     * Build the table rows for each user object.
-     */
-    var renderTableRows = function renderTableRows(userObjects) {
-        return userObjects.map(function (user, index) {
-            if (user) {
-                return renderTableRow(user, index);
-            }
-        });
-    };
-
-    /**
      * Determines the sort criteria for the list of user objects stored in state.
      * The user objects are then sorted and their data is added to a table.
      * Finally, the table is added to state.
@@ -244,18 +247,19 @@ var RandomUserTable = function RandomUserTable() {
         var userList = userObjects;
         userList.sort(sortComparator);
 
-        var tableHeader = renderTableHeader();
-        var tableRows = renderTableRows(userList);
-        var tableBody = React.createElement(
-            "tbody",
-            null,
-            tableRows
-        );
         var table = React.createElement(
             "table",
             { className: "table" },
-            tableHeader,
-            tableBody
+            React.createElement(TableHeader, {
+                onHeaderIndexUpdate: setSelectedHeaderIndex,
+                headerIndex: selectedHeaderIndex,
+                onDirectionUpdate: setSortDirection,
+                direction: sortDirection }),
+            React.createElement(
+                "tbody",
+                null,
+                React.createElement(TableRows, { userObjects: userList })
+            )
         );
 
         setIsLoading(false);

@@ -100,6 +100,62 @@ const formatDateOfBirth = (dob) => {
 }
 
 /**
+ * Build a table row for a given user object.
+ */
+const renderTableRow = (user) => {
+    const color = getBirthdayStatusColor(user.birthday);
+    const userProps = [
+        user.firstName,
+        user.lastName,
+        user.country,
+        user.dob,
+        <span className={color}>{user.birthday}</span>
+    ];
+    const tableData = userProps.map((userProp) => {
+        return <td>{userProp}</td>;
+    });
+    return <tr>{tableData}</tr>;
+}
+
+/**
+ * Table Rows representing users.
+ */
+const TableRows = ({ userObjects }) => {
+    return userObjects.map((user) => {
+        if (user) {
+            return renderTableRow(user);
+        }
+    });
+}
+
+/**
+ * Header for the User Table.
+ */
+const TableHeader = ({ onHeaderIndexUpdate, headerIndex, onDirectionUpdate, direction }) => {
+    const handleSort = (index) => {
+        // Given the index of a table header, update the sorting-related state and
+        // then re-render the table.
+        onDirectionUpdate(headerIndex === index ? flipSortDirection(direction) : SORT_DIRECTION.asc,);
+        onHeaderIndexUpdate(index);
+    }
+
+    const headers = TABLE_HEADERS.map((header, index) => {
+        const sortIconClass = getSortIconClass(index, headerIndex, direction);
+
+        return (
+            <th onClick={() => handleSort(index) }>
+                {header} <i className={sortIconClass}></i>
+            </th>
+        );
+    });
+    return (
+        <thead>
+            <tr>{headers}</tr>
+        </thead>
+    );
+}
+
+/**
  * Render the RandomUserTable.
  */
 const RandomUserTable = () => {
@@ -133,60 +189,6 @@ const RandomUserTable = () => {
     }, [userObjects, sortDirection, selectedHeaderIndex]);
 
     /**
-     * Given the index of a table header, update the sorting-related state and
-     * then re-render the table.
-     */
-    const handleSort = (index) => {
-        setSortDirection(selectedHeaderIndex === index ? flipSortDirection(sortDirection) : SORT_DIRECTION.asc,);
-        setSelectedHeaderIndex(index);
-    }
-
-    /**
-     * Build the header for the table.
-     */
-    const renderTableHeader = () => {
-        const headers = TABLE_HEADERS.map((header, index) => {
-            const sortIconClass = getSortIconClass(index, selectedHeaderIndex, sortDirection);
-            const sortIcon = <i className={sortIconClass}></i>;
-
-            return (
-                <th onClick={() => handleSort(index) }>{header} {sortIcon}</th>
-            );
-        });
-        const tableRow = <tr>{headers}</tr>;
-        return <thead>{tableRow}</thead>;
-    }
-
-    /**
-     * Build a table row for a given user object.
-     */
-    const renderTableRow = (user, index) => {
-        const color = getBirthdayStatusColor(user.birthday);
-        const userProps = [
-            user.firstName,
-            user.lastName,
-            user.country,
-            user.dob,
-            <span className={color}>{user.birthday}</span>
-        ];
-        const tableData = userProps.map((userProp, i) => {
-            return <td>{userProp}</td>;
-        });
-        return <tr>{tableData}</tr>;
-    }
-
-    /**
-     * Build the table rows for each user object.
-     */
-    const renderTableRows = (userObjects) => {
-        return userObjects.map((user, index) => {
-            if (user) {
-                return renderTableRow(user, index);
-            }
-        });
-    }
-
-    /**
      * Determines the sort criteria for the list of user objects stored in state.
      * The user objects are then sorted and their data is added to a table.
      * Finally, the table is added to state.
@@ -196,13 +198,18 @@ const RandomUserTable = () => {
         const userList = userObjects;
         userList.sort(sortComparator);
 
-        const tableHeader = renderTableHeader();
-        const tableRows = renderTableRows(userList);
-        const tableBody = <tbody>{tableRows}</tbody>;
-        const table = <table className="table">
-            {tableHeader}
-            {tableBody}
-        </table>;
+        const table = (
+            <table className="table">
+                <TableHeader 
+                    onHeaderIndexUpdate={setSelectedHeaderIndex}
+                    headerIndex={selectedHeaderIndex}
+                    onDirectionUpdate={setSortDirection}
+                    direction={sortDirection} />
+                <tbody>
+                    <TableRows userObjects={userList} />
+                </tbody>
+            </table>
+        );
 
         setIsLoading(false);
         setUserTable(table);
